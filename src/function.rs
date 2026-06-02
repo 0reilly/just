@@ -132,18 +132,26 @@ impl Function {
 }
 
 fn absolute_path(context: Context, path: &str) -> FunctionResult {
-  let abs_path_unchecked = context
-    .execution_context
-    .working_directory()
-    .join(path)
-    .lexiclean();
-  match abs_path_unchecked.to_str() {
-    Some(absolute_path) => Ok(absolute_path.to_owned()),
-    None => Err(format!(
-      "working directory is not valid unicode: {}",
-      context.execution_context.search.working_directory.display()
-    )),
-  }
+  path
+    .split_whitespace()
+    .map(|path| {
+      let abs_path_unchecked = context
+        .execution_context
+        .working_directory()
+        .join(path)
+        .lexiclean();
+      abs_path_unchecked
+        .to_str()
+        .map(str::to_string)
+        .ok_or_else(|| {
+          format!(
+            "working directory is not valid unicode: {}",
+            context.execution_context.search.working_directory.display()
+          )
+        })
+    })
+    .collect::<Result<Vec<String>, String>>()
+    .map(|paths| paths.join(" "))
 }
 
 fn append(_context: Context, suffix: &str, s: &str) -> FunctionResult {

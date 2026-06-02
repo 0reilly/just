@@ -872,6 +872,27 @@ fn test_absolute_path_resolves_parent() {
 }
 
 #[test]
+fn test_absolute_path_resolves_list() {
+  let test_object = Test::new()
+    .justfile("path := absolute_path('./a ./b')")
+    .args(["--evaluate", "path"]);
+
+  let mut tempdir = test_object.tempdir.path().to_owned();
+
+  if cfg!(unix) {
+    tempdir = tempdir.canonicalize().unwrap();
+  }
+
+  test_object
+    .stdout(format!(
+      "{} {}",
+      tempdir.join("a").to_str().unwrap(),
+      tempdir.join("b").to_str().unwrap(),
+    ))
+    .success();
+}
+
+#[test]
 fn path_exists_subdir() {
   Test::new()
     .tree(tree! {
