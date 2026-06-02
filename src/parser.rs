@@ -377,20 +377,32 @@ impl<'run, 'src> Parser<'run, 'src> {
       }
     }
 
-    let mut items = self.items.iter().rev();
-    if matches!(items.next(), Some(Item::Newline))
-      && matches!(items.next(), Some(Item::Comment(_)))
-      && matches!(items.next(), Some(Item::Newline) | None)
-    {
-      self.items.pop().unwrap();
+    let mut lines = Vec::new();
 
-      if let Item::Comment(contents) = self.items.pop().unwrap() {
-        Some(contents[1..].trim_start().into())
+    loop {
+      let mut items = self.items.iter().rev();
+      if matches!(items.next(), Some(Item::Newline))
+        && matches!(items.next(), Some(Item::Comment(_)))
+        && matches!(items.next(), Some(Item::Newline) | None)
+      {
+        self.items.pop().unwrap();
+
+        if let Item::Comment(contents) = self.items.pop().unwrap() {
+          lines.push(contents[1..].trim_start().to_owned());
+        } else {
+          unreachable!();
+        }
       } else {
-        unreachable!();
+        break;
       }
-    } else {
+    }
+
+    lines.reverse();
+
+    if lines.is_empty() {
       None
+    } else {
+      Some(lines.join("\n"))
     }
   }
 

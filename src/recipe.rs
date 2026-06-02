@@ -636,7 +636,9 @@ impl<D: Display> ColorDisplay for Recipe<'_, D> {
       .any(|attribute| matches!(attribute, Attribute::Doc(_)))
     {
       if let Some(doc) = &self.doc {
-        writeln!(f, "# {doc}")?;
+        for line in doc.lines() {
+          writeln!(f, "# {line}")?;
+        }
       }
     }
 
