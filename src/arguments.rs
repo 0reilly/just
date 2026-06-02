@@ -109,7 +109,8 @@ pub struct Arguments {
   #[arg(
     conflicts_with = "dotenv_path",
     help = "Search for environment file named <DOTENV-FILENAME> instead of `.env`",
-    long
+    long,
+    short = 'F',
   )]
   pub(crate) dotenv_filename: Option<String>,
   #[arg(
